@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
-import pytorch_lightning as pl
-from pytorch_lightning.utilities.parsing import lightning_getattr
+# import pytorch_lightning as pl
+from pytorch_lightning.utilities.parsing import lightning_getattr # mysterious import error without this
 import math
 import torch
 from torch.utils.checkpoint import checkpoint   # Without this, I get an import error.
@@ -8,15 +8,15 @@ from torch import nn
 from torch.nn import functional as F
 import transformers
 from transformers.optimization import get_linear_schedule_with_warmup
-from pytorch_lightning.core.decorators import auto_move_data
+import lightning as L
 
 from transformers import LongformerModel
 
-from allennlp_nn_util import batched_index_select
-from allennlp_feedforward import FeedForward
-from metrics import SciFactMetrics
+from model.allennlp_nn_util import batched_index_select
+from model.allennlp_feedforward import FeedForward
+from .metrics import SciFactMetrics
 
-import util
+from .util import *
 
 
 def masked_binary_cross_entropy_with_logits(input, target, weight, rationale_mask):
@@ -49,7 +49,7 @@ def masked_binary_cross_entropy_with_logits(input, target, weight, rationale_mas
     return final_loss
 
 
-class MultiVerSModel(pl.LightningModule):
+class MultiVerSModel(L.LightningModule):
     """
     Multi-task SciFact model that encodes claim / abstract pairs using
     Longformer and then predicts rationales and labels in a multi-task fashion.
@@ -144,13 +144,19 @@ class MultiVerSModel(pl.LightningModule):
     @staticmethod
     def _get_encoder(hparams):
         "Start from the Longformer science checkpoint."
-        starting_encoder_name = "allenai/longformer-large-4096"
+        starting_encoder_name = "checkpoints/longformer-large-4096"
+
+        # patch -- 2026 --
+        assert pathlib.Path(starting_encoder_name).exists(), (
+            f"Expected Longformer checkpoint at {starting_encoder_name} not found. "
+            "Make sure to run `bash checkpoints/longformer.sh` before training.")
         encoder = LongformerModel.from_pretrained(
             starting_encoder_name,
             gradient_checkpointing=hparams.gradient_checkpointing)
 
         orig_state_dict = encoder.state_dict()
-        checkpoint_prefixed = torch.load(util.get_longformer_science_checkpoint())
+
+        checkpoint_prefixed = torch.load(get_longformer_science_checkpoint())
 
         # New checkpoint
         new_state_dict = {}
@@ -339,7 +345,7 @@ class MultiVerSModel(pl.LightningModule):
 
         return res
 
-    @auto_move_data
+    # @auto_move_data
     def predict(self, batch, force_rationale=False):
         """
         Make predictions on a batch passed in from the dataloader.
@@ -362,8 +368,8 @@ class MultiVerSModel(pl.LightningModule):
                         2: "SUPPORT"}
 
         # Get predicted rationales, only keeping eligible sentences.
-        instances = util.unbatch(batch, ignore=["tokenized"])
-        output_unbatched = util.unbatch(output)
+        instances = unbatch(batch, ignore=["tokenized"])
+        output_unbatched = unbatch(output)
 
         predictions = []
         for this_instance, this_output in zip(instances, output_unbatched):

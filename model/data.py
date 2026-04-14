@@ -8,12 +8,13 @@ from transformers import AutoTokenizer, BatchEncoding
 import torch
 import numpy as np
 
-import util
+from .util import load_jsonl, flatten
 
 
 def get_tokenizer():
     "Need to add a few special tokens to the default longformer checkpoint."
-    tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-large-4096")
+    
+    tokenizer = AutoTokenizer.from_pretrained("checkpoints/longformer-large-4096")
     ADDITIONAL_TOKENS = {
         "section_start": "<|sec|>",
         "section_end": "</|sec|>",
@@ -126,7 +127,7 @@ class MultiVerSDataset(Dataset):
             sent_lens[longest] -= 1
             length_so_far = sum(sent_lens)
 
-        sents_flat = util.flatten(sents)
+        sents_flat = flatten(sents)
 
         input_ids = claim_and_title_tok + sents_flat + [self.tokenizer.eos_token_id]
 
@@ -190,11 +191,13 @@ class MultiVerSReader:
         """
         res = []
 
-        corpus = util.load_jsonl(self.corpus_file)
+        corpus = load_jsonl(self.corpus_file)
         corpus_dict = {x["doc_id"]: x for x in corpus}
-        claims = util.load_jsonl(self.data_file)
+        claims = load_jsonl(self.data_file)
 
         for claim in claims:
+            if "doc_ids" not in claim:
+                claim["doc_ids"] = claim['cited_doc_ids'] # scifact patch
             for doc_id in claim["doc_ids"]:
                 candidate_doc = corpus_dict[doc_id]
                 to_tensorize = {"claim": claim["claim"],

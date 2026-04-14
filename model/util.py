@@ -41,7 +41,7 @@ def write_jsonl(data, fname):
 def get_longformer_science_checkpoint():
     current_dir = pathlib.Path(os.path.realpath(__file__)).parent
     fname = current_dir.parent / "checkpoints/longformer_large_science.ckpt"
-
+    assert fname.exists(), f"Expected checkpoint at {fname} not found. Make sure to run `uv run get_checkpoint.py longformer_large_science` before training."
     return str(fname)
 
 

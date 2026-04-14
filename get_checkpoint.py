@@ -15,7 +15,6 @@ def get_model(name):
     if not pathlib.Path(out_file).exists():
         subprocess.run(cmd)
 
-
 def main():
     choices = [
         "all",

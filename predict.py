@@ -2,10 +2,15 @@ from tqdm import tqdm
 import argparse
 from pathlib import Path
 
-from model import MultiVerSModel
-from data import get_dataloader
-import util
+from model.model import MultiVerSModel
+from model.data import get_dataloader
+from model.util import load_jsonl, write_jsonl
+from lightning.fabric.utilities import move_data_to_device
 
+import warnings
+
+warnings.filterwarnings("ignore", module="lightning.pytorch.utilities.migration")
+warnings.filterwarnings("ignore", module="pytorch_lightning")
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -54,6 +59,7 @@ def get_predictions(args):
     predictions_all = []
 
     for batch in tqdm(dataloader):
+        batch = move_data_to_device(batch, model.device)
         preds_batch = model.predict(batch, args.force_rationale)
         predictions_all.extend(preds_batch)
 
@@ -63,7 +69,7 @@ def get_predictions(args):
 def format_predictions(args, predictions_all):
     # Need to get the claim ID's from the original file, since the data loader
     # won't have a record of claims for which no documents were retireved.
-    claims = util.load_jsonl(args.input_file)
+    claims = load_jsonl(args.input_file)
     claim_ids = [x["id"] for x in claims]
     assert len(claim_ids) == len(set(claim_ids))
 
@@ -100,7 +106,7 @@ def main():
 
     # Save final predictions as json.
     formatted = format_predictions(args, predictions)
-    util.write_jsonl(formatted, outname)
+    write_jsonl(formatted, outname)
 
 
 if __name__ == "__main__":

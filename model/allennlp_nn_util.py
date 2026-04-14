@@ -1437,17 +1437,15 @@ def flattened_index_select(target: torch.Tensor, indices: torch.LongTensor) -> t
     selected = flattened_selected.view(target.size(0), indices.size(0), indices.size(1), -1)
     return selected
 
-
 def get_range_vector(size: int, device: int) -> torch.Tensor:
     """
     Returns a range vector with the desired size, starting at 0. The CUDA implementation
     is meant to avoid copy data from CPU to GPU.
     """
     if device > -1:
-        return torch.cuda.LongTensor(size, device=device).fill_(1).cumsum(0) - 1
+        return torch.arange(size, dtype=torch.long, device=f"cuda:{device}")
     else:
-        return torch.arange(0, size, dtype=torch.long)
-
+        return torch.arange(size, dtype=torch.long)
 
 def bucket_values(
     distances: torch.Tensor, num_identity_buckets: int = 4, num_total_buckets: int = 10
