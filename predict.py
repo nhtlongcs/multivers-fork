@@ -9,8 +9,8 @@ from lightning.fabric.utilities import move_data_to_device
 
 import warnings
 
-# warnings.filterwarnings("ignore", module="lightning.pytorch.utilities.migration")
-# warnings.filterwarnings("ignore", module="pytorch_lightning")
+warnings.filterwarnings("ignore", module="lightning.pytorch.utilities.migration")
+warnings.filterwarnings("ignore", module="pytorch_lightning")
 
 def get_args():
     parser = argparse.ArgumentParser()
