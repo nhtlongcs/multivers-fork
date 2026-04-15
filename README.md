@@ -2,6 +2,19 @@ The original MultiVerS repository is broken with the latest version of dependenc
 
 > Disclaimer: The patches implemented in this fork are quick fixes to get the code running again, and may not be the best way to implement the features. Such as multiple GPU support, etc. If you have any suggestions on how to improve the code, please feel free to open a PR.
 
+---
+
+```bash
+# Tested on 
+Python 3.10
+torch 2.8.0
+lightning 2.5
+transformers 4.2.2 
+```
+
+*Checkpoint loading changed in the new version of Hugging Face Transformers, so the version of Transformers is pinned to the original version. It may be possible to update the code to work with the latest version of Transformers, but it may require some modifications, which is not the focus of this fork.*
+
+
 ## Usage
 
 Currently, this fork only supports inference on the SciFact dataset. 
