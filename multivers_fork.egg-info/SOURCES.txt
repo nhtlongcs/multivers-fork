@@ -1,8 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-multivers_fork.egg-info/PKG-INFO
-multivers_fork.egg-info/SOURCES.txt
-multivers_fork.egg-info/dependency_links.txt
-multivers_fork.egg-info/requires.txt
-multivers_fork.egg-info/top_level.txt
