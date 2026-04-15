@@ -146,10 +146,10 @@ class MultiVerSModel(L.LightningModule):
         "Start from the Longformer science checkpoint."
         starting_encoder_name = "checkpoints/longformer-large-4096"
 
-        # patch -- 2026 --
         assert pathlib.Path(starting_encoder_name).exists(), (
             f"Expected Longformer checkpoint at {starting_encoder_name} not found. "
             "Make sure to run `bash checkpoints/longformer.sh` before training.")
+        
         encoder = LongformerModel.from_pretrained(
             starting_encoder_name,
             gradient_checkpointing=hparams.gradient_checkpointing)
@@ -174,7 +174,6 @@ class MultiVerSModel(L.LightningModule):
         ADD_TO_CHECKPOINT = ["embeddings.position_ids"]
         for name in ADD_TO_CHECKPOINT:
             new_state_dict[name] = orig_state_dict[name]
-
         # Resize embeddings and load state dict.
         target_embed_size = new_state_dict['embeddings.word_embeddings.weight'].shape[0]
         encoder.resize_token_embeddings(target_embed_size)
