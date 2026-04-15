@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
-# import pytorch_lightning as pl
-from pytorch_lightning.utilities.parsing import lightning_getattr # mysterious import error without this
+import lightning as L
+from lightning.pytorch.utilities.parsing import lightning_getattr # mysterious import error without this
 import math
 import torch
 from torch.utils.checkpoint import checkpoint   # Without this, I get an import error.
@@ -8,7 +8,6 @@ from torch import nn
 from torch.nn import functional as F
 import transformers
 from transformers.optimization import get_linear_schedule_with_warmup
-import lightning as L
 
 from transformers import LongformerModel
 
